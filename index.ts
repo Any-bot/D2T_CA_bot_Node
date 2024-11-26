@@ -9,7 +9,7 @@ import {
   saveAddress,
   loadTrackedAddresses,
 } from "./utils/utils";
-import logger from "./utils/logger";
+// import logger from "./utils/logger";
 
 // Create readline interface
 const rl = readline.createInterface({
@@ -58,7 +58,7 @@ const telegramClient = new TelegramClient(
 
 // Discord event handlers
 discordClient.on("ready", () => {
-  logger.info(`Logged in as ${discordClient.user?.tag}`);
+  // logger.info(`Logged in as ${discordClient.user?.tag}`);
   console.log(`Logged in as ${discordClient.user?.tag}`);
 });
 
@@ -75,7 +75,7 @@ discordClient.on("messageCreate", async (message: any) => {
         // logger.info(`Detected message in ${serverConfig[serverId]}`);
 
         const solanaAddresses = await detectSolanaTokenAddress(message.content);
-        logger.info(`Detected Solana addresses: ${solanaAddresses}`);
+        // logger.info(`Detected Solana addresses: ${solanaAddresses}`);
 
         if (solanaAddresses.length > 0) {
           const addressMap = loadTrackedAddresses();
@@ -87,25 +87,25 @@ discordClient.on("messageCreate", async (message: any) => {
                 await telegramClient.sendMessage(BOT_USERNAME, {
                   message: address,
                 });
-                logger.info(`Sent message for address: ${address}`);
+                // logger.info(`Sent message for address: ${address}`);
                 saveAddress(address);
                 // Add delay between messages
                 await new Promise((resolve) => setTimeout(resolve, 1000));
               } catch (error) {
-                logger.error(
-                  `Failed to send message for address ${address}: ${error}`
-                );
+                // logger.error(
+                //   `Failed to send message for address ${address}: ${error}`
+                // );
                 continue;
               }
             } else {
-              logger.info(`Skipping existing address: ${address}`);
+              // logger.info(`Skipping existing address: ${address}`);
             }
           }
         }
       }
     }
   } catch (error) {
-    logger.error(`Error processing message: ${error}`);
+    // logger.error(`Error processing message: ${error}`);
     // Don't exit process, just log the error and continue
   }
 });
@@ -121,7 +121,7 @@ async function startTelegramClient() {
         await promptUser("Please enter the code you received: "),
       onError: (err: any) => console.log(err),
     });
-    logger.info("📲 Telegram client started successfully");
+    // logger.info("📲 Telegram client started successfully");
   } catch (err: any) {
     console.error("Error starting Telegram client:", err);
     process.exit(1);
@@ -132,7 +132,7 @@ async function startDiscordClient() {
   try {
     console.log("Starting Discord client... ");
     await discordClient.login(DISCORD_USER_TOKEN);
-    logger.info("🤖 Discord client started successfully");
+    // logger.info("🤖 Discord client started successfully");
   } catch (err: any) {
     console.error("Error starting Discord client:", err);
     process.exit(1);
@@ -148,14 +148,14 @@ async function main() {
 
     // Add process error handlers
     process.on("uncaughtException", (error) => {
-      logger.error("Uncaught Exception:", error);
+      // logger.error("Uncaught Exception:", error);
     });
 
     process.on("unhandledRejection", (error) => {
-      logger.error("Unhandled Rejection:", error);
+      // logger.error("Unhandled Rejection:", error);
     });
   } catch (error) {
-    logger.error("Error in main:", error);
+    // logger.error("Error in main:", error);
     process.exit(1);
   }
 }
