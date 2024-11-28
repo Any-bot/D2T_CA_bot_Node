@@ -8,7 +8,10 @@ import {
   detectSolanaTokenAddress,
   saveAddress,
   loadTrackedAddresses,
+  saveAddressDiscord,
+  loadTrackedAddressesDiscord,
 } from "./utils/utils";
+import { NewMessage } from "telegram/events";
 // import logger from "./utils/logger";
 
 // Create readline interface
@@ -44,6 +47,7 @@ const TELEGRAM_API_HASH = process.env.TELEGRAM_API_HASH || "";
 // Get settings from config
 const BOT_USERNAME = config.telegram.bot_username;
 const MONITORED_SERVERS = config.discord.server_channels;
+const TARGET_TELEGRAM_CHANNELS = config.telegram.target_channels;
 
 // Initialize Discord client
 const discordClient = new Client();
@@ -78,17 +82,18 @@ discordClient.on("messageCreate", async (message: any) => {
         // logger.info(`Detected Solana addresses: ${solanaAddresses}`);
 
         if (solanaAddresses.length > 0) {
-          const addressMap = loadTrackedAddresses();
+          const addressMap = loadTrackedAddressesDiscord();
           // Process addresses sequentially
           for (const address of solanaAddresses) {
             // Check if address exists in Map before sending
-            if (!addressMap.has(address)) {
+            // if (!addressMap.has(address)) {
+            if (addressMap.get(address) !== 1) {
               try {
                 await telegramClient.sendMessage(BOT_USERNAME, {
                   message: address,
                 });
                 // logger.info(`Sent message for address: ${address}`);
-                saveAddress(address);
+                saveAddressDiscord(address);
                 // Add delay between messages
                 await new Promise((resolve) => setTimeout(resolve, 1000));
               } catch (error) {
@@ -109,6 +114,52 @@ discordClient.on("messageCreate", async (message: any) => {
     // Don't exit process, just log the error and continue
   }
 });
+
+telegramClient.addEventHandler(async (event: any) => {
+  try {
+    if (event?.message?.message) {
+      const messageText = event.message.message;
+      // console.log(`1 Received message: ${messageText}`);
+      const solanaAddresses = await detectSolanaTokenAddress(messageText);
+      // console.log(`2 Detected Solana addresses: ${solanaAddresses}`);
+
+      if (solanaAddresses.length > 0) {
+        const addressMap = loadTrackedAddresses();
+        // console.log(`3 Address map: ${addressMap}`);
+        // Process each address individually
+        for (const address of solanaAddresses) {
+          // console.log(`4 Processing address: ${address}`);
+          if (addressMap.get(address) !== 1) {
+            // console.log(`5 Forwarding address: ${address}`);
+            for (const targetChannel of TARGET_TELEGRAM_CHANNELS) {
+              // console.log(`6 Forwarding to ${targetChannel}`);
+              try {
+                // console.log(`7 Sending message to ${targetChannel}`);
+                await telegramClient.sendMessage(targetChannel, {
+                  message: address, // Send just the address
+                });
+                // console.log(`8 CA ${address} forwarded to ${targetChannel}`);
+                saveAddress(address);
+                // console.log(`9 Saved new address: ${address}`);
+                // console.log(
+                //   "10 loadTrackedAddresses()",
+                //   loadTrackedAddresses()
+                // );
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+              } catch (error) {
+                console.log(`11 Forward failed to ${targetChannel}:`, error);
+              }
+            }
+          } else {
+            console.log(`12 Address ${address} already tracked, skipping`);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.log("Error processing Telegram message:", error);
+  }
+}, new NewMessage({}));
 
 async function startTelegramClient() {
   try {
