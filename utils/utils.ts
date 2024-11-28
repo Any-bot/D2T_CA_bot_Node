@@ -33,10 +33,18 @@ export async function detectSolanaTokenAddress(
 
 // Create a Map to store addresses with timestamps
 const addressMap = new Map<string, number>();
+const addressMapDiscord = new Map<string, number>();
+
 
 export function saveAddress(address: string): void {
   if (!addressMap.has(address)) {
-    addressMap.set(address, Date.now());
+    addressMap.set(address, 1);
+  }
+}
+
+export function saveAddressDiscord(address: string): void {
+  if (!addressMapDiscord.has(address)) {
+    addressMapDiscord.set(address, 1);
   }
 }
 
@@ -44,9 +52,8 @@ export function loadTrackedAddresses(): Map<string, number> {
   return addressMap;
 }
 
-// Additional useful functions you can use:
-export function getAddressTimestamp(address: string): number | undefined {
-  return addressMap.get(address);
+export function loadTrackedAddressesDiscord(): Map<string, number> {
+  return addressMapDiscord;
 }
 
 export function clearOldAddresses(maxAgeMs: number): void {

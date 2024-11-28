@@ -1,6 +1,7 @@
 {
   "telegram": {
-    "bot_username": "@email_alarm_bot"
+    "bot_username": "@email_alarm_bot",
+    "target_channels": ["-1002340692403"]
   },
   "discord": {
     "server_channels": [
