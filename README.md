@@ -1,4 +1,4 @@
-# Discord to Telegram CA Forwarder
+# Discord to Telegram Token Contract Address Forwarder
 
 This is a simple script that forwards messages from a Discord channel to a Telegram bot.
 
@@ -76,6 +76,4 @@ npm start
 
 ## Author
 
-[Email](pleasebugmenot.dev@gmail.com)
-
-[Telegram](https://t.me/crypto_0614)
+[Telegram](https://t.me/plzbugmenot)
